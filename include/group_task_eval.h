@@ -19,22 +19,22 @@ struct GroupTaskEvalResult {
     int query_id = -1;
     std::string method;
 
-    double constraint_recall = 0.0;   // 你已有的 recall 约束完成度
-    int overlap_hits = 0;             // 与 proxy truth 的重合个数
+    double constraint_recall = 0.0;   
+    int overlap_hits = 0;             
     int min_overlap_required = 0;
-    int positives_hit = 0;            // 命中的真实响应用户数
+    int positives_hit = 0;            
 
     double precision_at_k = 0.0;
     double recall_at_k = 0.0;
     double hitrate_at_k = 0.0;
     double ndcg_at_k = 0.0;
 
-    int spread_at_k = 0;              // 你选出的群体的一跳去重覆盖
-    int ideal_spread_at_k = 0;        // 在相同候选池 + 相同 recall 约束下的近似最优覆盖
-    double nspread_at_k = 0.0;        // = spread / ideal_spread
+    int spread_at_k = 0;             
+    int ideal_spread_at_k = 0;        
+    double nspread_at_k = 0.0;       
 
-    int pool_spread_upper = 0;        // 整个候选池的一跳并集，仅作参考
-    double pool_cover_rate = 0.0;     // = spread / pool_spread_upper
+    int pool_spread_upper = 0;        
+    double pool_cover_rate = 0.0;     
 };
 
 inline std::vector<int> UniqueKeepOrder(const std::vector<int>& ids) {
@@ -216,9 +216,7 @@ inline void AddNodeSpreadToCovered(int node,
     for (int v : nbs) covered.insert(v);
 }
 
-// 在“相同候选池 + 相同 recall floor”下，近似求一个可行的 ideal group。
-// 1) 先从 proxy truth 交集里贪心选 min_overlap_required 个，确保 recall 约束；
-// 2) 再从剩余候选里贪心补满 K 个，最大化 spread。
+
 template <typename GraphT>
 inline std::vector<int> GreedyFeasibleIdealGroup(const std::vector<int>& candidate_pool_ids,
                                                  const std::unordered_set<int>& proxy_truth,
@@ -244,7 +242,6 @@ inline std::vector<int> GreedyFeasibleIdealGroup(const std::vector<int>& candida
     std::unordered_set<int> covered;
     std::unordered_set<int> used;
 
-    // Phase 1: 先满足 recall floor
     for (int step = 0; step < feasible_overlap; ++step) {
         int best_u = -1;
         int best_gain = -1;
@@ -262,7 +259,6 @@ inline std::vector<int> GreedyFeasibleIdealGroup(const std::vector<int>& candida
         AddNodeSpreadToCovered(best_u, covered, social_graph, include_seed_itself);
     }
 
-    // Phase 2: 用所有剩余候选继续贪心补满 K
     while (selected.size() < K) {
         int best_u = -1;
         int best_gain = -1;
@@ -398,4 +394,4 @@ inline void PrintGroupTaskEvalSummary(const std::vector<GroupTaskEvalResult>& ro
     std::cout << "=============================================" << std::endl;
 }
 
-#endif // GROUP_TASK_EVAL_H
+#endif 
