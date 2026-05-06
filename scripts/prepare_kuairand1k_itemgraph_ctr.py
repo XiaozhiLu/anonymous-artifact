@@ -18,10 +18,6 @@ import torch.nn as nn
 import torch.optim as optim
 
 
-# ============================================================
-# 1. BPR-MF
-# ============================================================
-
 class BPRMF(nn.Module):
     def __init__(self, n_users, n_items, dim):
         super().__init__()
@@ -108,10 +104,6 @@ def train_bprmf(train_pairs, n_users, n_items, dim=64, epochs=20, batch_size=204
     return model.cpu()
 
 
-# ============================================================
-# 2. calibrator
-# ============================================================
-
 class LogisticCalibrator(nn.Module):
     def __init__(self):
         super().__init__()
@@ -149,10 +141,6 @@ def fit_calibrator_with_sampling(raw_scores, labels, max_samples=200000, seed=42
     return fit_calibrator(raw_scores, labels, epochs=300, lr=0.05)
 
 
-# ============================================================
-# 3. IO
-# ============================================================
-
 def save_embedding_bin(path, arr):
     arr = np.asarray(arr, dtype=np.float32)
     n, d = arr.shape
@@ -179,10 +167,6 @@ def save_calibration(path, a, b):
         f.write(f"{a} {b}\n")
 
 
-# ============================================================
-# 4. item user-aggregate embedding
-# ============================================================
-
 def build_item_useragg_emb(train_click_df, user_emb, n_items, dim):
     item_users = defaultdict(list)
     for row in train_click_df.itertuples(index=False):
@@ -198,12 +182,6 @@ def build_item_useragg_emb(train_click_df, user_emb, n_items, dim):
 
     return item_useragg_emb
 
-
-# ============================================================
-# 5. build item graph by co-click
-# 每个用户点击过的 item 两两连边；边强度 = 共点击用户数
-# 由于当前 C++ SocialGraph 是无权图，这里保留每个 item strongest top_m neighbors
-# ============================================================
 
 def build_item_coclick_graph(train_click_df, top_m=20):
     user_items = defaultdict(list)
@@ -233,10 +211,6 @@ def build_item_coclick_graph(train_click_df, top_m=20):
     return edges
 
 
-# ============================================================
-# 6. normalization and fused item embedding for mode2
-# ============================================================
-
 def l2_normalize(mat):
     norm = np.linalg.norm(mat, axis=1, keepdims=True) + 1e-12
     return mat / norm
@@ -250,12 +224,6 @@ def build_mode2_fused_item_emb(item_emb, item_useragg_emb, beta=0.5):
     return fused.astype(np.float32)
 
 
-# ============================================================
-# 7. raw scores for calibration
-# mode1: alpha * <u, item_emb> + (1-alpha) * <u, item_useragg_emb>
-# mode2: <normalize(u), fused_item_emb>
-# ============================================================
-
 def compute_mode1_scores(user_emb, item_emb, item_useragg_emb, users, items, alpha):
     s1 = np.sum(user_emb[users] * item_emb[items], axis=1)
     s2 = np.sum(user_emb[users] * item_useragg_emb[items], axis=1)
@@ -266,11 +234,6 @@ def compute_mode2_scores(user_emb, fused_item_emb, users, items):
     user_norm = user_emb[users]
     user_norm = user_norm / (np.linalg.norm(user_norm, axis=1, keepdims=True) + 1e-12)
     return np.sum(user_norm * fused_item_emb[items], axis=1)
-
-
-# ============================================================
-# 8. main
-# ============================================================
 
 def main():
     parser = argparse.ArgumentParser()
@@ -305,7 +268,6 @@ def main():
     df_calib = pd.read_csv(calib_log, usecols=usecols)
     df_test = pd.read_csv(test_log, usecols=usecols)
 
-    # 仍然限制到 random test 出现过的 candidate pool item
     candidate_items = set(df_test["video_id"].unique().tolist())
     df_train = df_train[df_train["video_id"].isin(candidate_items)].copy()
     df_calib = df_calib[df_calib["video_id"].isin(candidate_items)].copy()
