@@ -116,6 +116,15 @@ The C++ KuaiRand-1K experiment reads  files from:
 data/processed/kuairand1k_itemgraph_ctr/
 ```
 
+## Existing Assets and Licenses
+
+This repository does not redistribute the raw datasets. Users should download each dataset from its official source and follow the corresponding license and terms of use.
+
+- SIFT1M is downloaded from the TEXMEX corpus website. We use it only for ANN benchmark evaluation and do not redistribute the raw data in this repository. The official page does not clearly specify a license, so users should follow the terms provided by the original source.
+- CiaoDVD is downloaded from the LibRec dataset page. We use it only for academic evaluation and do not redistribute the raw data in this repository. The official page should be consulted for usage restrictions and citation requirements.
+- KuaiRand-1K is downloaded from Zenodo and is released under the Creative Commons Attribution 4.0 International license.
+- hnswlib is used as an HNSW implementation and is released under the Apache-2.0 license.
+
 ## Notes
 
 1. The raw datasets are not included in this repository.
